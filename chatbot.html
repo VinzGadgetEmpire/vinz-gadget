@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Questions? — Vinz Gadget Empire</title>
+<link rel="icon" type="image/x-icon" href="./favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="chatbot.css" />
+</head>
+<body>
+
+<header class="chat-header">
+  <a href="index.html" class="chat-back" aria-label="Back to site">← Vinz Gadget Empire</a>
+  <span class="chat-header-title">Got Questions?</span>
+</header>
+
+<main class="chat-shell">
+  <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+
+  <div class="chat-quick" id="chat-quick"></div>
+
+  <form class="chat-input-row" id="chat-form">
+    <input type="text" id="chat-input" placeholder="Ask about warranty, pricing, trade-ins…" autocomplete="off" />
+    <button type="submit" aria-label="Send">Send</button>
+  </form>
+
+  <p class="chat-disclaimer">This is a simple FAQ assistant, not a live person. For anything urgent, call <a href="tel:0187655733">018-765 5733</a>.</p>
+</main>
+
+<script src="chatbot.js"></script>
+</body>
+</html>

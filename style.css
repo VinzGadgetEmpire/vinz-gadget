@@ -1,0 +1,987 @@
+:root{
+  --black: #0a0a0a;
+  --black-soft: #121212;
+  --white: #f4f3ef;
+  --white-dim: #b8b6ae;
+  --red: #e0261c;
+  --red-dim: #7a1310;
+  --line: rgba(244,243,239,0.12);
+
+  --display: 'Archivo', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  --ease: cubic-bezier(.16,.84,.44,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background:var(--black); scroll-behavior:auto; overscroll-behavior-y:none;}
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:var(--display);
+  overflow-x:hidden;
+  cursor:default;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+}
+
+/* ---------- grain overlay ---------- */
+#grain{
+  position:fixed; inset:0; z-index:999; pointer-events:none;
+  opacity:0.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- loader ---------- */
+#loader{
+  position:fixed; inset:0; z-index:1000;
+  background:var(--black);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:24px;
+  transition:opacity 0.8s var(--ease), visibility 0.8s;
+}
+#loader.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+.loader-logo{
+  width:64px; height:64px; object-fit:contain; border-radius:12px;
+  animation:loaderPulse 1.6s ease-in-out infinite;
+}
+@keyframes loaderPulse{
+  0%,100%{transform:scale(1); opacity:0.85;}
+  50%{transform:scale(1.08); opacity:1;}
+}
+.loader-mark{
+  font-family:var(--mono); font-size:13px; letter-spacing:0.4em; color:var(--white-dim);
+}
+.loader-bar{
+  width:220px; height:1px; background:var(--line); position:relative; overflow:hidden;
+}
+.loader-bar span{
+  position:absolute; left:0; top:0; height:100%; width:0%;
+  background:var(--red);
+}
+.loader-pct{
+  font-family:var(--mono); font-size:11px; color:var(--red); letter-spacing:0.15em;
+}
+
+/* ---------- nav ---------- */
+#nav{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:28px 48px;
+}
+.nav-mark{
+  font-family:var(--mono); font-size:13px; letter-spacing:0.2em; font-weight:500;
+  display:flex; align-items:center; gap:12px;
+}
+.nav-logo{
+  width:30px; height:30px; object-fit:contain; border-radius:6px; display:block;
+  mix-blend-mode:normal;
+  isolation:isolate;
+}
+.nav-mark span{ mix-blend-mode:difference; }
+.nav-mark .dot{color:var(--red); mix-blend-mode:normal;}
+@media (max-width:640px){
+  .nav-mark span{display:none;}
+}
+.nav-links{display:flex; gap:36px;}
+.nav-links a{
+  color:var(--white); text-decoration:none; font-family:var(--mono);
+  font-size:12px; letter-spacing:0.08em; opacity:0.75; transition:opacity 0.3s;
+}
+.nav-links a:hover{opacity:1;}
+.nav-cta{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.08em;
+  color:var(--white); text-decoration:none;
+  border:1px solid var(--white); padding:8px 16px;
+  mix-blend-mode:normal;
+}
+.nav-burger{
+  display:none;
+  flex-direction:column; justify-content:center; gap:5px;
+  width:36px; height:36px; padding:0;
+  background:none; border:none; cursor:pointer;
+  mix-blend-mode:normal; z-index:101;
+}
+.nav-burger span{
+  display:block; width:100%; height:2px; background:var(--white);
+  transition:transform 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+.nav-burger.is-open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.nav-burger.is-open span:nth-child(2){opacity:0;}
+.nav-burger.is-open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+.nav-mobile-menu{
+  position:fixed; inset:0; z-index:99;
+  background:var(--black);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.35s var(--ease);
+}
+.nav-mobile-menu.is-open{opacity:1; pointer-events:auto;}
+.nav-mobile-menu a{
+  color:var(--white); text-decoration:none;
+  font-family:var(--display); font-weight:700; text-transform:uppercase;
+  font-size:1.6rem; letter-spacing:-0.01em;
+}
+.nav-mobile-menu a:hover{color:var(--red);}
+.nav-mobile-cta{
+  margin-top:12px;
+  font-family:var(--mono) !important; font-weight:400 !important; font-size:14px !important;
+  color:var(--red) !important; border:1px solid var(--red); padding:12px 28px; border-radius:999px;
+}
+@media (max-width:900px){
+  .nav-links{display:none;}
+  .nav-cta{display:none;}
+  .nav-burger{display:flex;}
+  #nav{padding:20px 24px;}
+}
+
+/* ---------- canvas ---------- */
+#gl{
+  position:fixed; top:0; left:0; width:100vw; height:100vh; height:100dvh; z-index:1;
+  display:block;
+}
+#portal-flash{
+  position:fixed; inset:0; z-index:3;
+  background:radial-gradient(circle at 50% 50%, #fff 0%, #fff 60%, rgba(255,255,255,0.9) 100%);
+  opacity:0;
+  pointer-events:none;
+}
+#portal-scroll-space{
+  height:180vh;
+  position:relative; z-index:2;
+}
+#new-page{
+  height:0;
+  padding:0; margin:0;
+}
+#scroll-host{
+  height:900vh;
+  position:relative; z-index:2;
+}
+
+/* Customer photos now render as 3D cards inside the flow-wave WebGL scene
+   (flow-wave.js) that fly through the terrain on scroll, so the old flat
+   DOM overlay (#terrain-photos / .customer-photo) has been removed. */
+#scene{
+  position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; display:block;
+  z-index:1; opacity:0; pointer-events:none;
+}
+#scroll-hint{
+  position:fixed;
+  bottom:24px; left:50%;
+  transform:translateX(-50%);
+  color:rgba(255,255,255,0.35);
+  font-family:sans-serif;
+  font-size:11px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  pointer-events:none;
+  z-index:10;
+  opacity:0;
+}
+
+/* ---------- stage (hero pin) ---------- */
+#stage{
+  position:relative; z-index:2;
+  height:100vh; height:100dvh; width:100%;
+  display:flex; flex-direction:column; justify-content:center;
+  pointer-events:none;
+}
+.stage-copy{
+  padding:0 48px;
+  max-width:900px;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.2em;
+  color:var(--red); text-transform:uppercase; margin-bottom:20px;
+  opacity:0; transform:translateY(12px);
+}
+.hero-title{
+  font-family:var(--display); font-weight:900;
+  font-size:clamp(2.6rem, 8vw, 6.4rem);
+  line-height:0.94; letter-spacing:-0.02em;
+  text-transform:uppercase;
+}
+.hero-title .line{
+  display:block; overflow:hidden;
+}
+.hero-title .line span{display:inline-block;}
+.hero-title .accent{color:var(--red);}
+.hero-sub{
+  font-family:var(--mono); font-size:14px; color:var(--white-dim);
+  margin-top:28px; max-width:420px; line-height:1.6;
+  opacity:0; transform:translateY(12px);
+}
+
+.scroll-cue{
+  position:absolute; bottom:40px; left:48px;
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.2em; color:var(--white-dim);
+}
+.scroll-cue-line{
+  width:1px; height:36px; background:var(--white-dim); position:relative; overflow:hidden;
+}
+.scroll-cue-line::after{
+  content:''; position:absolute; top:-100%; left:0; width:100%; height:100%;
+  background:var(--red); animation:scrollcue 1.8s ease-in-out infinite;
+}
+@keyframes scrollcue{
+  0%{top:-100%;} 60%{top:100%;} 100%{top:100%;}
+}
+
+.stage-progress{
+  position:absolute; bottom:40px; right:48px;
+  display:flex; align-items:center; gap:14px;
+  font-family:var(--mono); font-size:11px; color:var(--white-dim); letter-spacing:0.1em;
+}
+.stage-progress-track{
+  width:120px; height:1px; background:var(--line); position:relative;
+}
+.stage-progress-track span{
+  position:absolute; left:0; top:0; height:100%; width:0%; background:var(--red);
+}
+#stage-progress-label{color:var(--red);}
+
+/* narrative captions, left-aligned like the hero title, anchored low so they clear the phone */
+.stage-narrative{
+  position:fixed; z-index:3; left:0; right:0; bottom:12vh; top:auto;
+  pointer-events:none;
+}
+.narrative-line{
+  position:absolute; left:0; right:0; bottom:0;
+  padding:0 48px;
+  text-align:left;
+  font-family:var(--display); font-weight:900;
+  text-transform:uppercase;
+  font-size:clamp(1.7rem, 4.4vw, 3.4rem);
+  line-height:1.02;
+  letter-spacing:-0.02em;
+  color:var(--white);
+  max-width:760px;
+  opacity:0;
+}
+@media (max-width:640px){
+  .narrative-line{padding:0 24px;}
+}
+
+#stage-scroll-space{
+  height:400vh; /* drives the pinned timeline */
+  position:relative; z-index:2;
+  pointer-events:none;
+}
+
+/* ---------- scroll reveal system ---------- */
+.reveal-up{
+  opacity:0; transform:translateY(36px);
+  will-change:transform,opacity;
+}
+.reveal-card{
+  opacity:0; transform:translateY(48px) scale(0.97);
+  will-change:transform,opacity;
+}
+.section-num{
+  display:inline-block;
+}
+
+/* ---------- flip cards (hover to reveal pricing) ---------- */
+.model-card, .preowned-card{
+  perspective:1200px;
+}
+.card-flip{
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d;
+  transition:transform 0.7s cubic-bezier(.2,.9,.2,1);
+}
+.model-card:hover .card-flip, .preowned-card:hover .card-flip{
+  transform:rotateY(180deg);
+}
+.card-face{
+  position:absolute; inset:0; backface-visibility:hidden;
+  display:flex; flex-direction:column;
+}
+.card-front{
+  align-items:flex-start; justify-content:flex-start;
+}
+.card-back{
+  transform:rotateY(180deg);
+  justify-content:flex-start;
+}
+.card-back h3, .card-back h4{margin-bottom:16px;}
+
+.model-card{height:300px; padding:0;}
+.model-card .card-face{padding:32px 28px;}
+.preowned-card{height:230px; padding:0;}
+.preowned-card .card-face{padding:24px 20px;}
+
+.card-hint{
+  margin-top:auto;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.08em;
+  color:var(--red); text-transform:uppercase;
+}
+
+/* ---------- real phone photos (drop files into assets/phones/) ---------- */
+/* Fixed-size frame keeps every photo the same visual footprint on the card,
+   no matter what resolution/aspect ratio the downloaded image actually is. */
+.phone-photo-frame{
+  width:100px; height:130px;
+  display:flex; align-items:flex-end; justify-content:center;
+  margin-bottom:20px; flex-shrink:0;
+  overflow:hidden;
+}
+.phone-photo-frame.small{
+  width:64px; height:88px;
+  margin-bottom:14px;
+}
+.phone-photo{
+  max-width:100%; max-height:100%;
+  width:auto; height:auto;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 12px 22px rgba(0,0,0,0.55));
+  transition:transform 0.45s var(--ease), filter 0.45s var(--ease);
+  /* strips plain white/light backgrounds from photos that weren't pre-cut —
+     works well on white/light-grey product-shot backgrounds against our dark cards.
+     Has no effect on images that are already transparent PNGs. */
+  mix-blend-mode:multiply;
+}
+.model-card:hover .phone-photo,
+.preowned-card:hover .phone-photo{
+  transform:translateY(-6px) scale(1.05);
+  filter:drop-shadow(0 18px 28px rgba(0,0,0,0.65));
+}
+
+@media (max-width:640px){
+  .model-card, .preowned-card{height:auto;}
+  .card-flip{transform:none !important; position:relative;}
+  .card-face{position:relative; inset:auto;}
+  .card-back{transform:none; display:none;}
+  .model-card:hover .card-back, .preowned-card:hover .card-back{display:flex;}
+  .card-front{padding-bottom:8px;}
+}
+
+/* ---------- content sections ---------- */
+main section:not(#stage):not(#finale-panel):not(#experience){
+  position:relative; z-index:2;
+  background:var(--black);
+  padding:140px 48px;
+  border-top:1px solid var(--line);
+}
+/* Visit is the true last section — cut its bottom padding down so the page
+   ends right after its content instead of leaving ~140px of dead scroll
+   space before the hard stop kicks in. */
+#contact{
+  padding-bottom:64px;
+}
+@media (max-width:900px){
+  #contact{padding-bottom:48px;}
+}
+.section-head{
+  display:flex; align-items:baseline; gap:18px; margin-bottom:24px;
+}
+.section-num{
+  font-family:var(--mono); font-size:13px; color:var(--red); letter-spacing:0.1em;
+}
+main section h2{
+  font-family:var(--display); font-weight:900; text-transform:uppercase;
+  font-size:clamp(2rem, 5vw, 3.6rem); letter-spacing:-0.02em;
+}
+.section-lead{
+  font-family:var(--mono); font-size:14px; color:var(--white-dim); max-width:520px;
+}
+
+@media (max-width:640px){
+  .stage-copy{padding:0 24px;}
+  .scroll-cue, .stage-progress{left:24px; right:24px;}
+  main section:not(#stage):not(#finale-panel):not(#experience){padding:100px 24px;}
+}
+
+/* ---------- mobile phone finder (iframe embed) ---------- */
+/* Hidden on desktop by default. On mobile, this replaces #showcase and
+   #preowned entirely — see the max-width:768px block below. */
+.phone-finder-mobile-section{
+  display:none;
+}
+.phone-finder-frame-wrap{
+  position:relative;
+  width:100%;
+  height:min(78vh, 720px);
+  overflow:hidden;
+  background:var(--black);
+}
+#phone-finder-root{
+  width:100%;
+  height:100%;
+}
+.phone-finder-loading{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--white-dim);
+  background:var(--black);
+  pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+.phone-finder-loading.is-hidden{
+  opacity:0;
+}
+
+/* ---------- mobile customer gallery (flow-wave replacement, <=768px) ----------
+   Adapted from Codrops "Rotating On-Scroll Animations", variation 3.
+   Base rule hides it on desktop; the max-width:768px block further below
+   flips it to display:block (must come AFTER this in source order, since
+   both selectors share the same specificity). */
+.customer-gallery-mobile-section{
+  display:none;
+}
+.cgm-gallery{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top:48px;
+}
+.cgm-item-wrap{
+  width:100%;
+  max-width:340px;
+  perspective:900px;
+  margin-bottom:-4rem;
+}
+.cgm-item{
+  width:100%;
+  aspect-ratio:4/5;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  transform-style:preserve-3d;
+  will-change:transform, filter;
+  border-radius:10px;
+}
+.cgm-mark{
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  padding:32px 0 8px;
+  mix-blend-mode:difference;
+}
+.cgm-mark-inner{
+  display:flex;
+  align-items:center;
+  gap:1.6rem;
+  width:max-content;
+  will-change:transform;
+}
+.cgm-mark-inner span{
+  white-space:nowrap;
+  text-transform:uppercase;
+  font-family:var(--display);
+  font-weight:900;
+  font-size:clamp(1.5rem, 8vw, 2.2rem);
+  color:var(--red);
+  line-height:1;
+}
+
+@media (max-width:768px){
+  /* Swap: hide the desktop sliders, show the mobile iframe section.
+     main.js only builds the sliders / sets the iframe src for whichever
+     one is actually going to be visible, so the hidden one costs nothing. */
+  #showcase, #preowned{
+    display:none !important;
+  }
+  .phone-finder-mobile-section{
+    display:block;
+  }
+  /* flow-wave.js is never loaded on mobile (see main.js), so collapse the
+     900vh scroll-driving space it would otherwise leave empty, and hide
+     its (now-inert) canvas/scroll-hint. #customer-gallery-mobile — a
+     normal-flow section — takes its place instead. */
+  #scroll-host{
+    height:0;
+  }
+  #scene, #scroll-hint{
+    display:none;
+  }
+  .customer-gallery-mobile-section{
+    display:block;
+  }
+}
+
+/* ---------- model grid (showcase) ---------- */
+.model-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:1px;
+  background:var(--line);
+  margin-top:56px;
+  border:1px solid var(--line);
+}
+.model-card{
+  background:var(--black);
+  padding:32px 28px;
+  position:relative;
+  transition:background 0.3s;
+}
+.model-card:hover{background:var(--black-soft);}
+.model-card.featured{background:var(--black-soft);}
+.model-tag{
+  position:absolute; top:20px; right:24px; z-index:2;
+  font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
+  color:var(--red); text-transform:uppercase;
+}
+.model-card h3{
+  font-family:var(--display); font-weight:700; font-size:1.15rem;
+  text-transform:uppercase; letter-spacing:-0.01em; margin-bottom:24px;
+}
+.model-row{
+  display:flex; justify-content:space-between; gap:8px;
+  font-family:var(--mono); font-size:13px; color:var(--white-dim);
+  padding:10px 0; border-top:1px solid var(--line);
+  transition:padding 0.25s var(--ease), color 0.25s var(--ease);
+}
+.model-row span{flex:1;}
+.model-row span:first-child{flex:0 0 auto; color:var(--white-dim);}
+.model-row span:last-child{color:var(--white); font-weight:500; text-align:right;}
+.model-row-head{
+  color:var(--red) !important; font-size:10px; letter-spacing:0.1em; text-transform:uppercase;
+  border-top:none; padding-bottom:6px;
+}
+.model-row-head span{color:var(--red) !important;}
+.model-card:hover .model-row{padding-left:4px;}
+.model-note{
+  font-family:var(--mono); font-size:12px; color:var(--white-dim);
+  margin-top:24px; letter-spacing:0.02em;
+}
+
+@media (max-width:900px){
+  .model-grid{grid-template-columns:repeat(2, 1fr);}
+}
+@media (max-width:560px){
+  .model-grid{grid-template-columns:1fr;}
+}
+
+/* ---------- pre-owned grid ---------- */
+.preowned-grid{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:1px;
+  background:var(--line);
+  margin-top:56px;
+  border:1px solid var(--line);
+}
+.preowned-card{
+  background:var(--black);
+  padding:26px 22px;
+  transition:background 0.3s, transform 0.3s var(--ease);
+}
+.preowned-card:hover{background:var(--black-soft); transform:translateY(-4px);}
+.preowned-card h4{
+  font-family:var(--display); font-weight:600; font-size:0.92rem;
+  line-height:1.3; margin-bottom:14px; letter-spacing:-0.005em;
+}
+.preowned-range{
+  font-family:var(--mono); font-size:13px; color:var(--red);
+}
+@media (max-width:900px){
+  .preowned-grid{grid-template-columns:repeat(2, 1fr);}
+}
+@media (max-width:560px){
+  .preowned-grid{grid-template-columns:1fr;}
+}
+
+/* ---------- trust / warranty ---------- */
+.trust-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:48px;
+  margin-top:56px;
+}
+.trust-num{
+  font-family:var(--mono); font-size:13px; color:var(--red); letter-spacing:0.1em;
+  display:block; margin-bottom:18px;
+}
+.trust-item{transition:transform 0.3s var(--ease);}
+.trust-item:hover{transform:translateY(-4px);}
+.trust-item h4{
+  font-family:var(--display); font-weight:700; font-size:1.2rem;
+  text-transform:uppercase; margin-bottom:12px; letter-spacing:-0.01em;
+}
+.trust-item p{
+  font-family:var(--mono); font-size:13px; color:var(--white-dim); line-height:1.7;
+}
+@media (max-width:900px){
+  .trust-grid{grid-template-columns:1fr; gap:36px;}
+}
+
+/* ---------- contact ---------- */
+.contact-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:48px;
+  margin-top:56px;
+}
+.contact-label{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.15em;
+  color:var(--red); text-transform:uppercase; display:block; margin-bottom:14px;
+}
+.contact-block p{
+  font-family:var(--display); font-weight:500; font-size:1.15rem; line-height:1.5;
+}
+.contact-block a{color:var(--white); text-decoration:none; border-bottom:1px solid var(--line);}
+.contact-block a:hover{border-color:var(--red); color:var(--red);}
+@media (max-width:900px){
+  .contact-grid{grid-template-columns:1fr; gap:32px;}
+}
+
+/* ---------- mini footer, now living inside the finale panel ---------- */
+.finale-footer{
+  margin-top:48px;
+  display:flex; align-items:center; gap:10px; justify-content:center;
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em;
+  color:var(--white-dim); text-transform:uppercase;
+}
+.finale-footer-logo{
+  width:22px; height:22px; object-fit:contain; border-radius:5px;
+}
+@media (max-width:640px){
+  .finale-footer{flex-direction:column; gap:6px; text-align:center;}
+}
+/* ---------- finale: normal in-flow closing section ---------- */
+/* Previously this was a fixed, off-screen panel that hijacked scroll and
+   locked page overflow once you hit the bottom. Now it's just the last
+   normal section in the document — reveals like every other section as
+   you scroll to it, no locking, no scroll/wheel/touch interception. */
+#finale-panel{
+  position:relative;
+  z-index:2;
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(224,38,28,0.10), transparent 60%),
+    var(--black);
+  border-top:1px solid var(--line);
+  overflow:hidden;
+}
+.finale-back{
+  margin-top:36px;
+  background:none; border:none; cursor:pointer;
+  font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--white-dim);
+  transition:color 0.25s var(--ease);
+}
+.finale-back:hover{color:var(--red);}
+.finale-inner{
+  text-align:center;
+  max-width:640px;
+  padding:0 32px;
+}
+.finale-inner .eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.3em;
+  color:var(--red); text-transform:uppercase; margin-bottom:24px;
+}
+.finale-title{
+  font-family:var(--display); font-weight:700;
+  font-size:clamp(2.4rem, 6vw, 4.6rem);
+  line-height:1.02; letter-spacing:-0.02em;
+  margin-bottom:24px;
+}
+.finale-title .line{display:block;}
+.finale-title .accent{color:var(--red);}
+.finale-sub{
+  font-family:var(--display); font-weight:400; font-size:1.05rem;
+  color:var(--white-dim); line-height:1.6; margin-bottom:40px;
+}
+.finale-actions{
+  display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+}
+.finale-cta{
+  font-family:var(--mono); font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--black); background:var(--white);
+  padding:16px 28px; border-radius:999px; text-decoration:none;
+  transition:transform 0.3s var(--ease), background 0.3s var(--ease), color 0.3s var(--ease);
+  border:1px solid var(--white);
+}
+.finale-cta:hover{transform:translateY(-3px); background:var(--red); border-color:var(--red); color:var(--white);}
+.finale-cta.ghost{
+  background:transparent; color:var(--white); border:1px solid var(--line);
+}
+.finale-cta.ghost:hover{background:var(--white); color:var(--black); border-color:var(--white);}
+
+@media (max-width:640px){
+  .finale-actions{flex-direction:column; align-items:stretch;}
+  .finale-cta{text-align:center;}
+}
+
+/* ---------- phone coverflow slider (New + Pre-Owned) ---------- */
+/* Ported from a coverflow-style alien-select UI: one item centered and
+   enlarged, neighbors peeking in on either side, blurred and scaled down,
+   with arrow buttons to step through and an info panel that slides/fades
+   in per selection. */
+.phone-slider{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  padding:24px 0 8px;
+  border-radius:18px;
+  overflow:hidden;
+  transition:background 0.6s var(--ease);
+}
+.slider-stage{
+  position:relative;
+  width:100%;
+  max-width:640px;
+  height:340px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.slider-stage .slide-item{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  transition:transform 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.6s ease, filter 0.6s ease;
+  will-change:transform, opacity, filter;
+}
+.slider-stage .slide-item img{
+  width:140px; height:auto; max-height:220px; object-fit:contain;
+  filter:drop-shadow(0 16px 26px rgba(0,0,0,0.6));
+}
+.slider-stage .slide-item .slide-fallback-box{
+  width:110px; height:190px; border-radius:16px;
+  background:linear-gradient(155deg, #2a2a2a, #050505 60%);
+  border:1.5px solid rgba(244,243,239,0.2);
+}
+.slider-arrow{
+  position:absolute;
+  top:50%; transform:translateY(-50%);
+  width:48px; height:48px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--line);
+  color:var(--white);
+  cursor:pointer;
+  font-family:var(--mono); font-size:18px;
+  transition:background 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease);
+  z-index:10;
+}
+.slider-arrow:hover{
+  background:var(--red); border-color:var(--red);
+  transform:translateY(-50%) scale(1.08);
+}
+.slider-arrow.left{left:0;}
+.slider-arrow.right{right:0;}
+@media (max-width:640px){
+  .slider-arrow{width:38px; height:38px; font-size:14px;}
+}
+
+.slider-info{
+  width:100%; max-width:520px;
+  text-align:center;
+  padding:8px 16px 0;
+}
+.slider-info h3{
+  font-family:var(--display); font-weight:700; font-size:1.7rem;
+  letter-spacing:-0.01em; margin-bottom:6px;
+}
+.slider-info .slide-tag{
+  display:inline-block; margin-bottom:10px;
+  font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
+  color:var(--red); text-transform:uppercase;
+}
+.slider-price-table{
+  margin-top:14px; width:100%;
+  border-top:1px solid var(--line);
+}
+.slider-price-table .model-row{padding:12px 4px;}
+.slider-dots{
+  display:flex; gap:6px; justify-content:center; margin-top:18px; flex-wrap:wrap; max-width:400px;
+}
+.slider-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--line); cursor:pointer;
+  transition:background 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.slider-dot.active{background:var(--red); transform:scale(1.4);}
+
+/* ---------- experience: phone reassembles on the right ---------- */
+/* Mirrors #stage / #stage-scroll-space exactly: #experience is a normal
+   100vh block in document flow (so its copy is only naturally visible
+   while it's on screen), and #experience-scroll-space is an invisible
+   tall spacer whose scroll range drives the reassembly via main.js. */
+#experience{
+  position:relative; z-index:2;
+  height:100vh; height:100dvh; width:100%;
+  display:flex; flex-direction:column; justify-content:center;
+  pointer-events:none;
+  background:transparent;
+}
+.experience-copy{
+  padding:0 48px;
+  max-width:620px;
+}
+.experience-final-copy{
+  position:fixed; z-index:3; left:0; top:0;
+  width:100%; height:100vh; height:100dvh;
+  display:flex; align-items:flex-end; justify-content:center;
+  padding:0 24px 72px;
+  pointer-events:none;
+  text-align:center;
+}
+.experience-final-title{
+  color:var(--white);
+  max-width:640px;
+  margin:0;
+}
+@media (min-width:769px){
+  /* On desktop the phone reassembles offset to the right (see
+     EXPERIENCE_X_OFFSET_DESKTOP in main.js), so the reveal line sits on
+     the open left side of the screen rather than crowding the phone.
+     Mobile keeps the phone centered, so the text stays centered too
+     (base rule above). */
+  .experience-final-copy{
+    justify-content:flex-start;
+    padding-left:9vw;
+  }
+  .experience-final-title{
+    text-align:left;
+    max-width:480px;
+  }
+}
+.experience-title{
+  font-family:var(--display); font-weight:900; text-transform:uppercase;
+  font-size:clamp(2.6rem, 7vw, 5.5rem);
+  line-height:0.95; letter-spacing:-0.02em;
+  margin-bottom:22px;
+  overflow:hidden;
+}
+.experience-title .line{
+  display:inline-block;
+}
+.experience-sub{
+  font-family:var(--display); font-weight:400; font-size:1.05rem;
+  color:var(--white-dim); max-width:420px; line-height:1.6;
+}
+.experience-note{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--red); margin-top:18px;
+}
+#experience-scroll-space{
+  height:220vh;
+  position:relative; z-index:2;
+}
+@media (max-width:640px){
+  .experience-copy{padding:0 24px;}
+}
+/* ---------- booking form ---------- */
+.booking-form{
+  max-width:760px; margin:0 auto;
+  display:flex; flex-direction:column; gap:22px;
+}
+.booking-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:20px;
+}
+.booking-field{
+  display:flex; flex-direction:column; gap:8px;
+}
+.booking-field span{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--white-dim);
+}
+.booking-field input,
+.booking-field textarea,
+.booking-field select{
+  font-family:var(--display); font-size:16px; color:var(--white);
+  background:var(--black-soft);
+  border:1px solid var(--line); border-radius:10px;
+  padding:14px 16px;
+  transition:border-color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.booking-field input:focus,
+.booking-field textarea:focus,
+.booking-field select:focus{
+  outline:none; border-color:var(--red); background:rgba(224,38,28,0.06);
+}
+.booking-field select{
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8b6ae' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 16px center;
+  /* Without this, the browser renders the dropdown POPUP with its own
+     light default background while our text color stays near-white —
+     every option becomes near-invisible except whichever one has the
+     OS's own hover/highlight color under it. color-scheme:dark tells
+     the browser to use its dark native widget palette for this control,
+     and the explicit option colors below reinforce it where supported. */
+  color-scheme:dark;
+}
+.booking-field select option{
+  background:var(--black-soft);
+  color:var(--white);
+}
+.booking-field textarea{resize:vertical; min-height:90px;}
+.booking-field-full{grid-column:1 / -1;}
+
+.booking-participants{
+  border:1px solid var(--line); border-radius:10px; padding:18px 20px;
+  display:flex; flex-wrap:wrap; gap:16px 28px;
+}
+.booking-participants legend{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--red); padding:0 6px;
+}
+.participant-check{
+  display:flex; align-items:center; gap:10px; cursor:pointer;
+  font-family:var(--display); font-size:0.95rem; color:var(--white);
+}
+.participant-check input{
+  width:18px; height:18px; accent-color:var(--red); cursor:pointer;
+}
+
+.booking-submit{
+  align-self:flex-start;
+  font-family:var(--mono); font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--black); background:var(--white);
+  padding:16px 32px; border-radius:999px; border:1px solid var(--white);
+  cursor:pointer;
+  transition:transform 0.3s var(--ease), background 0.3s var(--ease), color 0.3s var(--ease);
+}
+.booking-submit:hover{transform:translateY(-3px); background:var(--red); border-color:var(--red); color:var(--white);}
+.booking-status{
+  font-family:var(--mono); font-size:12px; letter-spacing:0.05em;
+  color:var(--white-dim); min-height:16px;
+}
+.booking-status.is-success{color:var(--red);}
+.booking-status.is-error{color:#c0392b;}
+
+@media (max-width:640px){
+  .booking-grid{grid-template-columns:1fr;}
+  .booking-submit{align-self:stretch; text-align:center;}
+}
+
+/* ---------- floating chat button ---------- */
+.chat-fab{
+  position:fixed; right:24px; bottom:24px; z-index:500;
+  display:flex; align-items:center; gap:10px;
+  background:var(--red); color:var(--white);
+  padding:14px 20px; border-radius:999px; text-decoration:none;
+  font-family:var(--mono); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  transition:transform 0.3s var(--ease), background 0.3s var(--ease);
+}
+.chat-fab:hover{transform:translateY(-3px); background:var(--white); color:var(--black);}
+.chat-fab-icon{width:18px; height:18px; flex-shrink:0;}
+@media (max-width:640px){
+  .chat-fab{right:16px; bottom:16px; padding:12px 16px;}
+  .chat-fab-label{display:none;}
+  .chat-fab-icon{width:20px; height:20px;}
+}

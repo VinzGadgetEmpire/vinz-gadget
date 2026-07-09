@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vinz Gadget Empire — Love All. Serve All.</title>
+<link rel="icon" type="image/x-icon" href="./favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zodiak:wght@400;700&family=Neue+Montreal:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="phone-finder-embed/phone-finder-embed.css" />
+</head>
+<body>
+
+<!-- loader -->
+<div id="loader">
+  <img class="loader-logo" src="./assets/logo.jpeg" alt="Vinz Gadget Empire" />
+  <div class="loader-mark">VINZ GADGET EMPIRE</div>
+  <div class="loader-bar"><span id="loader-fill"></span></div>
+  <div class="loader-pct" id="loader-pct">0%</div>
+</div>
+
+<div id="grain"></div>
+
+<nav id="nav">
+  <div class="nav-mark">
+    <img src="./assets/logo.jpeg" alt="Vinz Gadget Empire" class="nav-logo" />
+    <span>VINZ<span class="dot">/</span>GADGET EMPIRE</span>
+  </div>
+  <div class="nav-links">
+    <a href="#showcase">New</a>
+    <a href="#preowned">Pre-Owned</a>
+    <a href="#trust">Warranty</a>
+    <a href="#experience">Experience</a>
+  </div>
+  <a href="tel:0187655733" class="nav-cta">018-765 5733</a>
+  <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="nav-mobile-menu" id="nav-mobile-menu">
+  <a href="#showcase">New</a>
+  <a href="#preowned">Pre-Owned</a>
+  <a href="#trust">Warranty</a>
+  <a href="#experience">Experience</a>
+  <a href="#booking">Book Appointment</a>
+  <a href="tel:0187655733" class="nav-mobile-cta">Call 018-765 5733</a>
+</div>
+
+<canvas id="gl"></canvas>
+<div id="portal-flash"></div>
+<canvas id="scene"></canvas>
+<div id="scroll-hint">scroll &#8595;</div>
+<!-- Customer photos are rendered inside the flow-wave WebGL scene as 3D
+     cards that fly through the terrain on scroll (see flow-wave.js) —
+     no DOM overlay needed here anymore. -->
+
+<main>
+
+  <!-- HERO / STAGE -->
+  <section id="stage">
+    <div class="stage-copy">
+      <p class="eyebrow">Kuala Lumpur · Est. Trust</p>
+      <h1 class="hero-title">
+        <span class="line">EVERY</span>
+        <span class="line accent">IPHONE</span>
+        <span class="line">HAS A NEXT OWNER.</span>
+      </h1>
+      <p class="hero-sub">New. Pre-owned. Inspected to the last screw. Scroll to take it apart.</p>
+    </div>
+
+    <div class="scroll-cue">
+      <span>SCROLL</span>
+      <div class="scroll-cue-line"></div>
+    </div>
+
+  </section>
+
+  <!-- narrative captions that appear during the pin -->
+  <div class="stage-narrative">
+    <p class="narrative-line" data-line="0">Titanium frame. Precision milled.</p>
+    <p class="narrative-line" data-line="1">Every unit inspected — down to the last screw.</p>
+    <p class="narrative-line" data-line="2">Whatever's inside, we've already checked it.</p>
+    <p class="narrative-line" data-line="3">New or pre-owned — this is what trust looks like.</p>
+  </div>
+
+  <!-- spacer to drive the pinned scroll animation -->
+  <div id="stage-scroll-space"></div>
+
+  <!-- MOBILE-ONLY: replaces #showcase + #preowned below on small screens.
+       Hidden on desktop via CSS; mounted via JS only when the mobile
+       breakpoint matches (see main.js, near the bottom).
+       Loads the Vinz iPhone Finder app directly into this page's DOM
+       (compiled to a standalone bundle, no iframe) so phones get the
+       interactive 3D browsing grid instead of the desktop slider. -->
+  <section id="phone-finder-mobile" class="reveal-section phone-finder-mobile-section">
+    <div class="section-head reveal-up">
+      <span class="section-num">02</span>
+      <h2>Browse Phones</h2>
+    </div>
+    <p class="section-lead reveal-up">New &amp; Pre-Owned, side by side. Drag around, zoom in, tap a phone to see it up close.</p>
+
+    <div class="phone-finder-frame-wrap reveal-up">
+      <div id="phone-finder-root"></div>
+      <div class="phone-finder-loading" id="phone-finder-loading">Loading phones…</div>
+    </div>
+  </section>
+
+  <section id="showcase" class="reveal-section">
+    <div class="section-head reveal-up">
+      <span class="section-num">02</span>
+      <h2>New — Sealed &amp; Boxed</h2>
+    </div>
+    <p class="section-lead reveal-up">Brand new. Sealed. Priced straight, no bargaining games. New and used pricing side by side.</p>
+
+    <div class="phone-slider reveal-up" id="new-slider"></div>
+  </section>
+
+  <section id="preowned" class="reveal-section">
+    <div class="section-head reveal-up">
+      <span class="section-num">03</span>
+      <h2>Pre-Owned</h2>
+    </div>
+    <p class="section-lead reveal-up">Every used unit backed by a 100-day warranty. Inspected before it ever reaches a shelf.</p>
+
+    <div class="phone-slider reveal-up" id="preowned-slider"></div>
+    <p class="model-note reveal-up">All pre-owned units come with a genuine 100-day warranty.</p>
+  </section>
+
+  <section id="trust" class="reveal-section">
+    <div class="section-head reveal-up">
+      <span class="section-num">04</span>
+      <h2>Warranty</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item reveal-card">
+        <span class="trust-num">01</span>
+        <h4>100-Day Coverage</h4>
+        <p>Every pre-owned unit ships with a genuine 100-day warranty. Not a courtesy — a commitment.</p>
+      </div>
+      <div class="trust-item reveal-card">
+        <span class="trust-num">02</span>
+        <h4>Inspected First</h4>
+        <p>Battery health, screen, cameras, and internals checked before any used phone is listed for sale.</p>
+      </div>
+      <div class="trust-item reveal-card">
+        <span class="trust-num">03</span>
+        <h4>New or Used, Same Standard</h4>
+        <p>Sealed units and refurbished units go through the same standard of honesty at the counter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE: reuses the same fixed canvas/phone from the hero. As the
+       user scrolls through #experience-scroll-space below, the previously
+       dissolved particles sweep back in and reassemble into the solid phone
+       on the right side of the screen, while this copy block (in normal
+       document flow, not fixed) is visible on the left for the first part
+       of that scroll — same pattern as the hero's #stage/#stage-scroll-space. -->
+  <section id="experience">
+    <div class="experience-copy">
+      <p class="eyebrow">Vinz Gadget Empire</p>
+      <h2 class="experience-title"><span class="line">EXPERIENCE</span></h2>
+      <p class="experience-sub">Every detail, put back together — right in front of you.</p>
+    </div>
+  </section>
+
+  <!-- Fixed (not normal document flow) so it stays on screen through the
+       whole #experience-scroll-space + #portal-scroll-space scroll range —
+       #experience itself is only 100vh and scrolls out of view long before
+       the phone finishes reassembling, so this can't live inside it. -->
+  <div class="experience-final-copy">
+    <h1 class="hero-title experience-final-title">
+      <span class="line">SINCE</span>
+      <span class="line accent">2021</span>
+    </h1>
+  </div>
+
+  <div id="experience-scroll-space"></div>
+
+  <!-- PORTAL: once THIS IS VINZ is showing and the phone is fully solid,
+       continuing to scroll dollies the camera into the phone's screen.
+       #portal-flash is a fixed white overlay that the dive fades to at the
+       end, then fades back out once #new-page scrolls into view — like
+       emerging through the screen into new content. -->
+  <div id="portal-scroll-space"></div>
+
+  <section id="new-page"></section>
+
+  <div id="scroll-host"></div>
+
+  <!-- MOBILE-ONLY: replaces the flow-wave fullscreen WebGL customer showcase
+       on small screens (flow-wave.js is never loaded on mobile — see the
+       matchMedia check near the top of main.js). Same 5 customer photos,
+       but as a lightweight scroll-rotate gallery instead of a 3D fly-through
+       — adapted from the Codrops "Rotating On-Scroll Animations" demo,
+       variation 3. Hidden on desktop via CSS (.customer-gallery-mobile-section). -->
+  <section id="customer-gallery-mobile" class="reveal-section customer-gallery-mobile-section">
+    <div class="section-head reveal-up">
+      <p class="eyebrow">Vinz Gadget Empire</p>
+      <h2>Real Customers</h2>
+    </div>
+
+    <div class="cgm-gallery">
+      <div class="cgm-item" style="background-image:url('./assets/customers/customer-1.jpg')"></div>
+      <div class="cgm-item" style="background-image:url('./assets/customers/customer-2.jpg')"></div>
+      <div class="cgm-item" style="background-image:url('./assets/customers/customer-3.jpg')"></div>
+      <div class="cgm-item" style="background-image:url('./assets/customers/customer-4.jpg')"></div>
+      <div class="cgm-item" style="background-image:url('./assets/customers/customer-5.jpg')"></div>
+    </div>
+
+    <div class="cgm-mark">
+      <div class="cgm-mark-inner">
+        <span>VINZ GADGET EMPIRE</span><span>/</span>
+        <span>LOVE ALL. SERVE ALL.</span><span>/</span>
+        <span>VINZ GADGET EMPIRE</span><span>/</span>
+        <span>LOVE ALL. SERVE ALL.</span><span>/</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOKING: last actionable page before the sign-off panel. Static site,
+       no backend — form currently shows a local confirmation only. Wiring
+       up a real send (mailto or a service like EmailJS/Formspree) is a
+       follow-up step; see the TODO in main.js's booking form handler. -->
+  <section id="booking" class="reveal-section">
+    <div class="section-head reveal-up">
+      <span class="section-num">05</span>
+      <h2>Book Appointment</h2>
+    </div>
+    <p class="section-lead reveal-up">Tell us what you're after and when suits you — pick who on our end should be notified.</p>
+
+    <form id="booking-form" class="booking-form reveal-up" novalidate>
+      <div class="booking-grid">
+        <label class="booking-field">
+          <span>Full Name</span>
+          <input type="text" name="name" required placeholder="Your name" />
+        </label>
+        <label class="booking-field">
+          <span>Phone Number</span>
+          <input type="tel" name="phone" required placeholder="010-xxx xxxx" />
+        </label>
+        <label class="booking-field">
+          <span>Email</span>
+          <input type="email" name="email" required placeholder="you@email.com" />
+        </label>
+        <label class="booking-field">
+          <span>Preferred Date</span>
+          <input type="date" name="date" required />
+        </label>
+        <label class="booking-field">
+          <span>Preferred Time</span>
+          <input type="time" name="time" required />
+        </label>
+        <label class="booking-field">
+          <span>Model You're Interested In</span>
+          <select name="model" id="booking-model">
+            <option value="">Select a model (optional)</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="booking-field booking-field-full">
+        <span>Anything else we should know?</span>
+        <textarea name="message" rows="3" placeholder="e.g. trade-in, storage size, colour preference..."></textarea>
+      </label>
+
+      <fieldset class="booking-participants">
+        <legend>Notify at Vinz Gadget Empire</legend>
+        <label class="participant-check">
+          <input type="checkbox" name="participants" value="sales" checked />
+          <span>Sales Team</span>
+        </label>
+        <label class="participant-check">
+          <input type="checkbox" name="participants" value="manager" />
+          <span>Store Manager</span>
+        </label>
+        <label class="participant-check">
+          <input type="checkbox" name="participants" value="vinz" />
+          <span>Vinz (Owner)</span>
+        </label>
+      </fieldset>
+
+      <button type="submit" class="booking-submit">Request Appointment</button>
+      <p class="booking-status" id="booking-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- CLOSING SECTION: normal in-flow section, reveals like every other
+       section via the .reveal-section/.reveal-up scroll system. No more
+       scroll-jacking or overflow locking. -->
+  <section id="finale-panel" class="reveal-section">
+    <div class="finale-inner reveal-up">
+      <p class="eyebrow">Vinz Gadget Empire</p>
+      <h2 class="finale-title">
+        <span class="line">READY TO</span>
+        <span class="line accent">UPGRADE?</span>
+      </h2>
+      <p class="finale-sub">Meet up or door to door delivery around KL, Selangor and Seremban — Postage Available With Insurance</p>
+      <div class="finale-actions">
+        <a href="tel:0187655733" class="finale-cta">Call 018-765 5733</a>
+        <a href="https://www.instagram.com/vinz_gad?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="finale-cta ghost">@vinz_gadjet</a>
+      </div>
+      <button id="finale-back" class="finale-back" aria-label="Back to site">↑ Back to top</button>
+      <div class="finale-footer">
+        <img src="./assets/logo.jpeg" alt="Vinz Gadget Empire" class="finale-footer-logo" />
+        <span>Vinz Gadget Empire — Love All. Serve All.<br>KL Area</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<a href="chatbot.html" class="chat-fab" aria-label="Ask a question">
+  <svg class="chat-fab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 5h16v11H7.5L4 19V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+  </svg>
+  <span class="chat-fab-label">Questions?</span>
+</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- EmailJS: sends the booking form straight from the browser to your team's
+     inbox(es), no backend server needed. Sign-up + setup steps are in
+     EMAIL-SETUP.md. Replace "YOUR_PUBLIC_KEY" below once you have it. -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function () {
+    if (window.emailjs) emailjs.init({ publicKey: "AgL8X7GSwjPtVjBi1" });
+  })();
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+  },
+  "scopes": {
+    "./flow-wave/": {
+      "three": "https://unpkg.com/three@0.143.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.143.0/examples/jsm/"
+    }
+  }
+}
+</script>
+<script src="phone-finder-embed/phone-finder-embed.js"></script>
+<!-- Live phone price/stock data from Supabase (see SETUP-GUIDE.md). Must
+     load before main.js so window.fetchPhoneInventory is available. -->
+<script src="inventory.js"></script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
