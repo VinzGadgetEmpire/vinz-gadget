@@ -1296,4 +1296,12 @@ if (navBurger && navMobileMenu) {
   navMobileMenu.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', closeMenu);
   });
+
+  window.addEventListener('load', () => ScrollTrigger.refresh());
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => ScrollTrigger.refresh());
+}
+window.addEventListener('load', () => {
+  setTimeout(() => ScrollTrigger.refresh(), 1000);
+});
 }
